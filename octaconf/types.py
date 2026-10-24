@@ -5,23 +5,41 @@ import os
 class BaseType(ABC):
     value = None
 
-    def _parse(self, name, prefix, file=None):
+    def parse(self, name, prefix, file=None):
         if file != None:
             pass
 
-        env_value = os.environ.get("_".join([prefix, name.upper()]))
+        var_name = name.upper()
+        if prefix != "":
+            var_name = f"{prefix}_{var_name}"
+
+        env_value = os.environ.get(var_name)
 
         if env_value != None:
-            self.value = env_value
+            self._parse(env_value)
 
     @abstractmethod
-    def parse(self, value):
-        pass
-
-    @abstractmethod
-    def validate(self):
+    def _parse(self, value):
         pass
 
 
 class String(BaseType):
-    pass
+    def __init__(self, default=None):
+        self.value = ""
+
+    def _parse(self, value):
+        self.value = str(value)
+
+    def __str__(self) -> str:
+        return self.value
+
+
+class Int(BaseType):
+    def __init__(self, default=None):
+        self.value = 0
+
+    def _parse(self, value):
+        self.value = int(value)
+
+    def __str__(self) -> str:
+        return str(self.value)
