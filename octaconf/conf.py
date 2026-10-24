@@ -12,4 +12,4 @@ class Config(ABC):
             if not isinstance(getattr(self, key), types.BaseType):
                 continue
 
-            getattr(self, key).parse(key, "")
+            getattr(self, key).parse(key, "", file)
