@@ -5,7 +5,7 @@ import os
 class BaseType(ABC):
     value = None
 
-    def _read_value(self, name, prefix, file=None):
+    def _read_value(self, name, prefix, data=None):
         var_name = name.upper()
         if prefix != "":
             var_name = f"{prefix}_{var_name}"
@@ -15,22 +15,22 @@ class BaseType(ABC):
         if env_value != None:
             return env_value
 
-        if file != None:
-            pass
+        if data != None:
+            return data
 
         return None
 
     @abstractmethod
-    def parse(self, name, prefix, file=None):
+    def parse(self, name, prefix, data=None):
         pass
 
 
 class String(BaseType):
-    def __init__(self, default=None):
+    def __init__(self, data=None):
         self.value = ""
 
-    def parse(self, name, prefix, file=None):
-        self.value = str(self._read_value(name, prefix, file))
+    def parse(self, name, prefix, data=None):
+        self.value = str(self._read_value(name, prefix, data))
 
     def __str__(self) -> str:
         return self.value
@@ -40,11 +40,15 @@ class Dict(BaseType):
     def __init__(self, default=None):
         self.value = {}
 
-    def parse(self, name, prefix, file=None):
+    def parse(self, name, prefix, data=None):
         prefix = f"{prefix}_{name.upper()}" if prefix != "" else name.upper()
 
         for key in dir(self):
+            cur_key_data = None
+            if data != None and key in data:
+                cur_key_data = data[key]
+
             if not isinstance(getattr(self, key), BaseType):
                 continue
 
-            getattr(self, key).parse(key, prefix, file)
+            getattr(self, key).parse(key, prefix, cur_key_data)
